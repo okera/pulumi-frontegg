@@ -4,13 +4,13 @@ archives:
 before:
   hooks:
   - make tfgen
-blobs:
-- bucket: get.pulumi.com
-  folder: releases/plugins/
-  ids:
-  - archive
-  provider: s3
-  region: us-west-2
+# blobs:
+# - bucket: get.pulumi.com
+#   folder: releases/plugins/
+#   ids:
+#   - archive
+#   provider: s3
+#   region: us-west-2
 builds:
 - binary: pulumi-resource-frontegg
   dir: provider
@@ -26,7 +26,7 @@ builds:
   - linux
   ignore: []
   ldflags:
-  - -X github.com/pulumi/pulumi-frontegg/provider/pkg/version.Version={{.Tag}}
+  - -X github.com/okera/pulumi-frontegg/provider/pkg/version.Version={{.Tag}}
   main: ./cmd/pulumi-resource-frontegg/
 changelog:
   filters:

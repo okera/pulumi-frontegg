@@ -4,7 +4,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  NUGET_PUBLISH_KEY: ${{ secrets.NUGET_PUBLISH_KEY }}
+  # NUGET_PUBLISH_KEY: ${{ secrets.NUGET_PUBLISH_KEY }}
   PROVIDER: frontegg
   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
   PULUMI_API: https://api.pulumi-staging.io
@@ -13,6 +13,8 @@ env:
   PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
   TRAVIS_OS_NAME: linux
+  # TODO: for now, disable Python publishing
+  NO_TFGEN_PYTHON_PACKAGE: "true"
 jobs:
   build_sdk:
     name: build_sdk
@@ -99,19 +101,19 @@ jobs:
         - 14.x
         pythonversion:
         - "3.7"
-  create_docs_build:
-    name: create_docs_build
-    needs: tag_sdk
-    runs-on: ubuntu-latest
-    steps:
-    - name: Install pulumictl
-      uses: jaxxstorm/action-install-gh-release@v1.2.0
-      with:
-        repo: pulumi/pulumictl
-    - env:
-        GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
-      name: Dispatch Event
-      run: pulumictl create docs-build pulumi-${{ env.PROVIDER }} ${GITHUB_REF#refs/tags/}
+  # create_docs_build:
+  #   name: create_docs_build
+  #   needs: tag_sdk
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Install pulumictl
+  #     uses: jaxxstorm/action-install-gh-release@v1.2.0
+  #     with:
+  #       repo: pulumi/pulumictl
+  #   - env:
+  #       GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+  #     name: Dispatch Event
+  #     run: pulumictl create docs-build pulumi-${{ env.PROVIDER }} ${GITHUB_REF#refs/tags/}
   prerequisites:
     name: prerequisites
     runs-on: ubuntu-latest
@@ -203,16 +205,16 @@ jobs:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
       uses: pulumi/action-install-pulumi-cli@v2
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-region: us-east-2
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        role-duration-seconds: 7200
-        role-external-id: upload-pulumi-release
-        role-session-name: ${{ env.PROVIDER }}@githubActions
-        role-to-assume: ${{ secrets.AWS_UPLOAD_ROLE_ARN }}
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     aws-region: us-east-2
+    #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     role-duration-seconds: 7200
+    #     role-external-id: upload-pulumi-release
+    #     role-session-name: ${{ env.PROVIDER }}@githubActions
+    #     role-to-assume: ${{ secrets.AWS_UPLOAD_ROLE_ARN }}
     - name: Set PreRelease Version
       run: echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic)"
         >> $GITHUB_ENV
@@ -320,20 +322,20 @@ jobs:
         - 14.x
         pythonversion:
         - "3.7"
-  tag_sdk:
-    name: tag_sdk
-    needs: publish_sdk
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v2
-    - name: Install pulumictl
-      uses: jaxxstorm/action-install-gh-release@v1.2.0
-      with:
-        repo: pulumi/pulumictl
-    - name: Add SDK version tag
-      run: git tag sdk/$(pulumictl get version --language generic) && git push origin
-        sdk/$(pulumictl get version --language generic)
+  # tag_sdk:
+  #   name: tag_sdk
+  #   needs: publish_sdk
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout Repo
+  #     uses: actions/checkout@v2
+  #   - name: Install pulumictl
+  #     uses: jaxxstorm/action-install-gh-release@v1.2.0
+  #     with:
+  #       repo: pulumi/pulumictl
+  #   - name: Add SDK version tag
+  #     run: git tag sdk/$(pulumictl get version --language generic) && git push origin
+  #       sdk/$(pulumictl get version --language generic)
   test:
     name: test
     needs: build_sdk
